@@ -119,7 +119,7 @@ class Feed extends Component {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(postData),
+      body: JSON.stringify({ title: postData.tile, content: postData.content }),
     })
       .then((res) => {
         if (res.status !== 200 && res.status !== 201) {
