@@ -25,6 +25,7 @@ exports.createPost = (req, res, next) => {
   const title = req.body.title;
   const content = req.body.content;
   let imageURL;
+  console.log(req);
 
   // Create post in db
   res.status(201).json({

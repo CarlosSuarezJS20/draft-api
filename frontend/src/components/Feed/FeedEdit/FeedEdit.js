@@ -90,6 +90,7 @@ class FeedEdit extends Component {
       for (const inputName in updatedForm) {
         formIsValid = formIsValid && updatedForm[inputName].valid;
       }
+      console.log(updatedForm);
       return {
         postForm: updatedForm,
         formIsValid: formIsValid,

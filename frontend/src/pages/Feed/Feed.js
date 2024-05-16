@@ -111,6 +111,7 @@ class Feed extends Component {
     let url = "http://localhost:8080/feed/post";
     let method = "POST";
     if (this.state.editPost) {
+      method = "PUT";
       url = "edit url";
     }
 
@@ -119,7 +120,10 @@ class Feed extends Component {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ title: postData.tile, content: postData.content }),
+      body: JSON.stringify({
+        title: postData.title,
+        content: postData.content,
+      }),
     })
       .then((res) => {
         if (res.status !== 200 && res.status !== 201) {
@@ -129,7 +133,7 @@ class Feed extends Component {
         return res.json();
       })
       .then((resData) => {
-        console.log(resData);
+        console.log("success");
         const post = {
           _id: resData.post._id,
           title: resData.post.title,
@@ -137,15 +141,22 @@ class Feed extends Component {
           creator: resData.post.creator,
           createdAt: resData.post.createdAt,
         };
+        console.log(post);
         this.setState((prevState) => {
-          let updatedPosts = [...prevState.posts];
+          // copy of the posts:
+          let updatedPosts = [...prevState.posts].concat(post);
+
           if (prevState.editPost) {
+            // finding post:
+            console.log("adding");
             const postIndex = prevState.posts.findIndex(
               (p) => p._id === prevState.editPost._id
             );
             updatedPosts[postIndex] = post;
-          } else if (prevState.posts.length < 2) {
-            updatedPosts = prevState.posts.concat(post);
+            // } else if (prevState.posts.length < 2) {
+            //   console.log("adding post");
+            //   console.log(post);
+            //   updatedPosts = prevState.posts.concat(post);
           }
           return {
             posts: updatedPosts,
