@@ -8,6 +8,7 @@ import Paginator from "../../components/Paginator/Paginator";
 import Loader from "../../components/Loader/Loader";
 import ErrorHandler from "../../components/ErrorHandler/ErrorHandler";
 import "./Feed.css";
+import { title } from "process";
 
 class Feed extends Component {
   state = {
@@ -59,12 +60,12 @@ class Feed extends Component {
         return res.json();
       })
       .then((resData) => {
+        console.log(resData);
         this.setState({
           posts: resData.posts,
           totalPosts: resData.totalItems,
           postsLoading: false,
         });
-        console.log(this.state.posts);
       })
       .catch(this.catchError);
   };
@@ -110,6 +111,7 @@ class Feed extends Component {
     // Set up data (with image!)
     let url = "http://localhost:8080/feed/post";
     let method = "POST";
+    // when editing the method will update.
     if (this.state.editPost) {
       method = "PUT";
       url = "edit url";
@@ -127,21 +129,29 @@ class Feed extends Component {
     })
       .then((res) => {
         if (res.status !== 200 && res.status !== 201) {
-          throw new Error("Creating or editing a post failed!");
+          res
+            .json()
+            .then((err) => {
+              console.log(err.errors);
+              throw new Error("Creating or editing a post failed!");
+            })
+            .catch((err) => console.log(err));
         }
 
         return res.json();
       })
       .then((resData) => {
         console.log("success");
+        console.log(resData.post._doc);
         const post = {
-          _id: resData.post._id,
-          title: resData.post.title,
-          content: resData.post.content,
-          creator: resData.post.creator,
-          createdAt: resData.post.createdAt,
+          _id: resData.post._doc._id,
+          title: resData.post._doc.title,
+          creator: { name: "Carlos" },
+          imageURL: resData.post._doc.imageURL,
+          createdAt: resData.post._doc.createdAt,
         };
         console.log(post);
+
         this.setState((prevState) => {
           // copy of the posts:
           let updatedPosts = [...prevState.posts].concat(post);
