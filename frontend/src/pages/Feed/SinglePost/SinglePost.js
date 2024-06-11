@@ -23,7 +23,6 @@ class SinglePost extends Component {
         return res.json();
       })
       .then((resData) => {
-        console.log(resData.posts[0]);
         this.setState({
           title: resData.posts[0].title,
           author: resData.posts[0].creator.name,

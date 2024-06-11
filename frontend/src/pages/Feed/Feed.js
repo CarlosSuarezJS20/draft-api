@@ -60,7 +60,6 @@ class Feed extends Component {
         return res.json();
       })
       .then((resData) => {
-        console.log(resData);
         this.setState({
           posts: resData.posts,
           totalPosts: resData.totalItems,
@@ -114,7 +113,7 @@ class Feed extends Component {
     // when editing the method will update.
     if (this.state.editPost) {
       method = "PUT";
-      url = "edit url";
+      url = "http://localhost:8080/feed/post/" + this.state.editPost._id;
     }
 
     fetch(url, {
@@ -141,8 +140,7 @@ class Feed extends Component {
         return res.json();
       })
       .then((resData) => {
-        console.log("success");
-        console.log(resData.post._doc);
+        console.log(resData);
         const post = {
           _id: resData.post._doc._id,
           title: resData.post._doc.title,
@@ -154,11 +152,11 @@ class Feed extends Component {
 
         this.setState((prevState) => {
           // copy of the posts:
-          let updatedPosts = [...prevState.posts].concat(post);
+          let updatedPosts = [...prevState.posts];
 
           if (prevState.editPost) {
             // finding post:
-            console.log("adding");
+
             const postIndex = prevState.posts.findIndex(
               (p) => p._id === prevState.editPost._id
             );
