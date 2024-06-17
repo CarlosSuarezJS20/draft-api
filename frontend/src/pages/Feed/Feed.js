@@ -8,7 +8,6 @@ import Paginator from "../../components/Paginator/Paginator";
 import Loader from "../../components/Loader/Loader";
 import ErrorHandler from "../../components/ErrorHandler/ErrorHandler";
 import "./Feed.css";
-import { title } from "process";
 
 class Feed extends Component {
   state = {
@@ -62,9 +61,10 @@ class Feed extends Component {
       .then((resData) => {
         this.setState({
           posts: resData.posts,
-          totalPosts: resData.totalItems,
+          totalPosts: resData.posts.length,
           postsLoading: false,
         });
+        console.log(this.state);
       })
       .catch(this.catchError);
   };
@@ -140,15 +140,14 @@ class Feed extends Component {
         return res.json();
       })
       .then((resData) => {
-        console.log(resData);
         const post = {
           _id: resData.post._doc._id,
           title: resData.post._doc.title,
           creator: { name: "Carlos" },
+          content: resData.post._doc.content,
           imageURL: resData.post._doc.imageURL,
           createdAt: resData.post._doc.createdAt,
         };
-        console.log(post);
 
         this.setState((prevState) => {
           // copy of the posts:
@@ -161,11 +160,14 @@ class Feed extends Component {
               (p) => p._id === prevState.editPost._id
             );
             updatedPosts[postIndex] = post;
-            // } else if (prevState.posts.length < 2) {
-            //   console.log("adding post");
-            //   console.log(post);
-            //   updatedPosts = prevState.posts.concat(post);
           }
+
+          if (
+            !prevState.posts.find((post) => post._id === resData.post._doc_id)
+          ) {
+            updatedPosts = prevState.posts.concat(post);
+          }
+
           return {
             posts: updatedPosts,
             isEditing: false,
@@ -191,7 +193,14 @@ class Feed extends Component {
 
   deletePostHandler = (postId) => {
     this.setState({ postsLoading: true });
-    fetch("URL")
+    const url = "http://localhost:8080/feed/delete/post/" + postId;
+    console.log(url);
+    fetch(url, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
       .then((res) => {
         if (res.status !== 200 && res.status !== 201) {
           throw new Error("Deleting a post failed!");

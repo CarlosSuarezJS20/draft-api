@@ -1,8 +1,29 @@
 const { validationResult } = require("express-validator");
 const Post = require("../models/post");
 
-exports.getPosts = (req, res, next) => {
+exports.deletePost = (req, res, next) => {
   const postId = req.params.id;
+
+  Post.deleteOne({ _id: postId })
+    .then((resData) => {
+      console.log(resData);
+      res.status(200).json({
+        message: "Post deleted succefully!",
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
+exports.getPosts = (req, res, next) => {
+  console.log("getting posts");
+  const postId = req.params.id;
+  const page = req.params.page;
+  console.log(page);
   const queryPostById = req.params.id !== undefined ? { _id: postId } : {};
   Post.find(queryPostById)
     .then((mongoosePosts) => {
@@ -52,7 +73,7 @@ exports.createPost = (req, res, next) => {
     .save()
     .then((post) => {
       // Create post in db
-      return res.status(200).json({
+      return res.status(201).json({
         message: "Post created successfully!",
         post: { ...post },
       });
@@ -98,6 +119,6 @@ exports.updatePost = (req, res, next) => {
       if (!err.statusCode) {
         err.statusCode = 500;
       }
-      next(err);
+      next(err); // middleware error handling
     });
 };
