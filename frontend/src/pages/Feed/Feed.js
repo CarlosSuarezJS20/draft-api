@@ -22,7 +22,8 @@ class Feed extends Component {
   };
 
   componentDidMount() {
-    fetch("http://localhost:8080/feed/posts")
+    console.log("component did mount ");
+    fetch("http://localhost:8080/feed/posts/" + this.state.postPage)
       .then((res) => {
         if (res.status !== 200) {
           throw new Error("Failed to fetch user status.");
@@ -38,6 +39,7 @@ class Feed extends Component {
   }
 
   loadPosts = (direction) => {
+    console.log("loading function");
     if (direction) {
       this.setState({ postsLoading: true, posts: [] });
     }
@@ -50,7 +52,7 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch("http://localhost:8080/feed/posts")
+    fetch("http://localhost:8080/feed/posts/" + this.state.postPage)
       .then((res) => {
         if (res.status !== 200) {
           throw new Error("Failed to fetch posts.");
@@ -61,7 +63,7 @@ class Feed extends Component {
       .then((resData) => {
         this.setState({
           posts: resData.posts,
-          totalPosts: resData.posts.length,
+          totalPosts: resData._totalPosts,
           postsLoading: false,
         });
         console.log(this.state);
@@ -208,7 +210,6 @@ class Feed extends Component {
         return res.json();
       })
       .then((resData) => {
-        console.log(resData);
         this.setState((prevState) => {
           const updatedPosts = prevState.posts.filter((p) => p._id !== postId);
           return { posts: updatedPosts, postsLoading: false };

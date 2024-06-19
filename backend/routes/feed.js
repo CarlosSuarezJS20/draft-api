@@ -13,8 +13,10 @@ const createPostValidator = [
   body("content").trim().isLength(5).withMessage("Review your content"),
 ];
 
+router.get("/post/:id", feedController.getPost);
+
 // GET /feed/posts
-router.get("/posts/:id?", feedController.getPosts);
+router.get("/posts/:pageNumber?", feedController.getPosts);
 
 // POST /feed/post
 router.post("/post", createPostValidator, feedController.createPost);

@@ -1,6 +1,8 @@
 const { validationResult } = require("express-validator");
 const Post = require("../models/post");
 
+const NUMBER_OF_POSTS = 2;
+
 exports.deletePost = (req, res, next) => {
   const postId = req.params.id;
 
@@ -19,13 +21,39 @@ exports.deletePost = (req, res, next) => {
     });
 };
 
-exports.getPosts = (req, res, next) => {
-  console.log("getting posts");
+exports.getPost = (req, res, next) => {
   const postId = req.params.id;
-  const page = req.params.page;
-  console.log(page);
-  const queryPostById = req.params.id !== undefined ? { _id: postId } : {};
-  Post.find(queryPostById)
+  Post.find({ _id: postId })
+    .then((mongoosePost) => {
+      if (!mongoosePost.length === 0) {
+        const error = new Error("Post not Found :(!");
+        error.statusCode = 404;
+
+        throw error;
+      }
+
+      res.status(200).json({
+        message: "fetched successful!",
+        post: { ...mongoosePost[0]._doc, creator: { name: "Carlos" } },
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
+exports.getPosts = (req, res, next) => {
+  let totalPosts;
+  const skipPosts = (req.params.pageNumber - 1) * NUMBER_OF_POSTS;
+
+  Post.countDocuments()
+    .then((total) => {
+      totalPosts = total;
+      return Post.find().skip(skipPosts).limit(NUMBER_OF_POSTS);
+    })
     .then((mongoosePosts) => {
       if (mongoosePosts.length === 0) {
         const error = new Error("Post not Found :(!");
@@ -40,6 +68,7 @@ exports.getPosts = (req, res, next) => {
       res.status(200).json({
         message: "fetched successful!",
         posts: tempPosts,
+        _totalPosts: totalPosts,
       });
     })
     .catch((err) => {
