@@ -22,28 +22,15 @@ class Feed extends Component {
   };
 
   componentDidMount() {
-    console.log("component did mount ");
-    fetch("http://localhost:8080/feed/posts/" + this.state.postPage)
-      .then((res) => {
-        if (res.status !== 200) {
-          throw new Error("Failed to fetch user status.");
-        }
-        return res.json();
-      })
-      .then((resData) => {
-        this.setState({ status: resData.status });
-      })
-      .catch(this.catchError);
-
     this.loadPosts();
   }
 
   loadPosts = (direction) => {
-    console.log("loading function");
     if (direction) {
       this.setState({ postsLoading: true, posts: [] });
     }
     let page = this.state.postPage;
+
     if (direction === "next") {
       page++;
       this.setState({ postPage: page });
@@ -52,7 +39,9 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch("http://localhost:8080/feed/posts/" + this.state.postPage)
+    fetch("http://localhost:8080/feed/posts/" + page, {
+      credentials: "include",
+    })
       .then((res) => {
         if (res.status !== 200) {
           throw new Error("Failed to fetch posts.");
@@ -66,7 +55,6 @@ class Feed extends Component {
           totalPosts: resData._totalPosts,
           postsLoading: false,
         });
-        console.log(this.state);
       })
       .catch(this.catchError);
   };
@@ -120,6 +108,7 @@ class Feed extends Component {
 
     fetch(url, {
       method: method,
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -199,6 +188,7 @@ class Feed extends Component {
     console.log(url);
     fetch(url, {
       method: "DELETE",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },

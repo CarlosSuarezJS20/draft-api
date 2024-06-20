@@ -5,19 +5,19 @@ const postSchema = new Schema(
   {
     title: {
       type: String,
-      require: true,
+      required: true,
     },
     content: {
       type: String,
-      require: true,
+      required: true,
     },
     imageURL: {
       type: String,
-      require: false,
+      required: false,
     },
     creator: {
       type: Schema.Types.ObjectId,
-      ref: "Creator",
+      ref: "User",
       required: false,
     },
   },
