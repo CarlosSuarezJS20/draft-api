@@ -1,4 +1,5 @@
 const { validationResult } = require("express-validator");
+const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
 
@@ -36,7 +37,6 @@ exports.signup = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
-  console.log(req.body);
   if (!validationResult(req).isEmpty()) {
     const error = new Error("Email not found");
     error.statusCode = 422;
@@ -49,11 +49,22 @@ exports.login = (req, res, next) => {
       if (req.body.password !== user.password) {
         const error = new Error("incorrect Password!");
         error.statusCode = 422;
+        throw error;
       }
+
+      const token = jwt.sign(
+        {
+          email: user.email,
+          userId: user._id.toString(),
+        },
+        "secret for app",
+        { expiresIn: "1h" }
+      );
 
       return res.status(201).json({
         message: "user found!!",
         userId: user._id,
+        token: token,
       });
     })
     .catch((err) => {

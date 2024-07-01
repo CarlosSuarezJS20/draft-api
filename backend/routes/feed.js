@@ -1,4 +1,5 @@
 const express = require("express");
+const authMiddleware = require("../middleware/isAuth");
 
 // validation
 const { body } = require("express-validator");
@@ -16,7 +17,7 @@ const createPostValidator = [
 router.get("/post/:id", feedController.getPost);
 
 // GET /feed/posts
-router.get("/posts/:pageNumber?", feedController.getPosts);
+router.get("/posts/:pageNumber?", authMiddleware, feedController.getPosts);
 
 // POST /feed/post
 router.post("/post", createPostValidator, feedController.createPost);

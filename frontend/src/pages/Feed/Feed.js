@@ -41,6 +41,9 @@ class Feed extends Component {
     }
     fetch("http://localhost:8080/feed/posts/" + page, {
       credentials: "include",
+      headers: {
+        Authorization: "Bearer " + this.props.token,
+      },
     })
       .then((res) => {
         if (res.status !== 200) {

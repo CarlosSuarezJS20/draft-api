@@ -72,8 +72,11 @@ class App extends Component {
       }),
     })
       .then((res) => {
+        if (res.status === 401) {
+          throw new Error("User not found");
+        }
         if (res.status === 422) {
-          throw new Error("Validation failed.");
+          throw new Error("Validation failed. Check details and try again");
         }
         if (res.status !== 200 && res.status !== 201) {
           console.log("Error!");
@@ -82,13 +85,13 @@ class App extends Component {
         return res.json();
       })
       .then((resData) => {
-        console.log(resData);
         this.setState({
           isAuth: true,
           token: resData.token,
           authLoading: false,
           userId: resData.userId,
         });
+        // storing in local memory browser
         localStorage.setItem("token", resData.token);
         localStorage.setItem("userId", resData.userId);
         const remainingMilliseconds = 60 * 60 * 1000;
