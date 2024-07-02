@@ -13,8 +13,9 @@ module.exports = (req, res, next) => {
   try {
     decodedToken = jwt.verify(token, "secret for app");
   } catch (err) {
-    err.status = 500;
     //picked up by middleware error
+    err.status = 500;
+    throw err;
   }
 
   if (!decodedToken) {

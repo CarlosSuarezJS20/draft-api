@@ -4,6 +4,7 @@ const Post = require("../models/post");
 const NUMBER_OF_POSTS = 2;
 
 exports.deletePost = (req, res, next) => {
+  console.log("deleting");
   const postId = req.params.id;
 
   Post.deleteOne({ _id: postId })
@@ -96,11 +97,13 @@ exports.createPost = (req, res, next) => {
     title: postTitle,
     content: postContent,
     imageURL: "images/duck.jpg",
+    creator: req.userId,
   });
 
   post
     .save()
     .then((post) => {
+      console.log(post);
       // Create post in db
       return res.status(201).json({
         message: "Post created successfully!",

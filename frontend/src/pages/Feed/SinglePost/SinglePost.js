@@ -17,6 +17,9 @@ class SinglePost extends Component {
 
     fetch(`http://localhost:8080/feed/post/${postId}`, {
       credentials: "include",
+      headers: {
+        Authorization: "Bearer " + this.props.token,
+      },
     })
       .then((res) => {
         if (res.status !== 200) {
@@ -25,6 +28,7 @@ class SinglePost extends Component {
         return res.json();
       })
       .then((resData) => {
+        console.log(resData);
         this.setState({
           title: resData.post.title,
           author: resData.post.creator.name,

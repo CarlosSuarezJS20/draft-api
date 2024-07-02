@@ -114,6 +114,7 @@ class Feed extends Component {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
+        Authorization: "Bearer " + this.props.token,
       },
       body: JSON.stringify({
         title: postData.title,
@@ -188,12 +189,13 @@ class Feed extends Component {
   deletePostHandler = (postId) => {
     this.setState({ postsLoading: true });
     const url = "http://localhost:8080/feed/delete/post/" + postId;
-    console.log(url);
+
     fetch(url, {
       method: "DELETE",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
+        Authorization: "Bearer " + this.props.token,
       },
     })
       .then((res) => {

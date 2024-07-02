@@ -14,16 +14,26 @@ const createPostValidator = [
   body("content").trim().isLength(5).withMessage("Review your content"),
 ];
 
-router.get("/post/:id", feedController.getPost);
+router.get("/post/:id", authMiddleware, feedController.getPost);
 
 // GET /feed/posts
 router.get("/posts/:pageNumber?", authMiddleware, feedController.getPosts);
 
 // POST /feed/post
-router.post("/post", createPostValidator, feedController.createPost);
+router.post(
+  "/post",
+  authMiddleware,
+  createPostValidator,
+  feedController.createPost
+);
 
-router.put("/post/:id", createPostValidator, feedController.updatePost);
+router.put(
+  "/post/:id",
+  authMiddleware,
+  createPostValidator,
+  feedController.updatePost
+);
 
-router.delete("/post/:id", feedController.deletePost);
+router.delete("/delete/post/:id", authMiddleware, feedController.deletePost);
 
 module.exports = router;
