@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
 const Post = require("../models/post");
+const User = require("../models/user");
 
 const NUMBER_OF_POSTS = 2;
 
@@ -35,7 +36,7 @@ exports.getPost = (req, res, next) => {
 
       res.status(200).json({
         message: "fetched successful!",
-        post: { ...mongoosePost[0]._doc, creator: { name: "Carlos" } },
+        post: { ...mongoosePost[0]._doc },
       });
     })
     .catch((err) => {
@@ -53,17 +54,14 @@ exports.getPosts = (req, res, next) => {
   Post.countDocuments()
     .then((total) => {
       totalPosts = total;
-      return Post.find().skip(skipPosts).limit(NUMBER_OF_POSTS);
+      return Post.find()
+        .populate("creator")
+        .skip(skipPosts)
+        .limit(NUMBER_OF_POSTS);
     })
     .then((mongoosePosts) => {
-      if (mongoosePosts.length === 0) {
-        const error = new Error("Post not Found :(!");
-        error.statusCode = 404;
-
-        throw error;
-      }
       const tempPosts = mongoosePosts.map((post) => {
-        return { ...post._doc, creator: { name: "Carlos" } };
+        return { ...post._doc };
       });
 
       res.status(200).json({
@@ -81,10 +79,12 @@ exports.getPosts = (req, res, next) => {
 };
 
 exports.createPost = (req, res, next) => {
-  const errors = validationResult(req);
-
+  // Validation
   const postTitle = req.body.title;
   const postContent = req.body.content;
+  const errors = validationResult(req);
+  let currentUser;
+  let newPost;
 
   if (!errors.isEmpty()) {
     const error = new Error("Validation failed. Check the details");
@@ -93,21 +93,44 @@ exports.createPost = (req, res, next) => {
     throw error;
   }
 
-  const post = new Post({
-    title: postTitle,
-    content: postContent,
-    imageURL: "images/duck.jpg",
-    creator: req.userId,
-  });
+  User.findById(req.userId)
+    .then((user) => {
+      console.log(user);
+      if (!user) {
+        const error = new Error("Not user found");
+        error.statusCode = 422;
+      }
 
-  post
-    .save()
+      const post = new Post({
+        title: postTitle,
+        content: postContent,
+        imageURL: "images/duck.jpg",
+        creator: user._id,
+      });
+
+      currentUser = user;
+
+      return post.save();
+    })
     .then((post) => {
       console.log(post);
+      newPost = post;
+      currentUser.posts.push(post._id);
+      currentUser.save();
       // Create post in db
+    })
+    .then((result) => {
+      console.log(newPost);
       return res.status(201).json({
         message: "Post created successfully!",
-        post: { ...post },
+        post: {
+          _id: newPost._id,
+          title: newPost.title,
+          content: newPost.content,
+          imageURL: newPost.imageURL,
+          creator: { name: currentUser.name },
+          createdAt: newPost.createdAt,
+        },
       });
     })
     .catch((err) => {

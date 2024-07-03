@@ -53,6 +53,7 @@ class Feed extends Component {
         return res.json();
       })
       .then((resData) => {
+        console.log(resData);
         this.setState({
           posts: resData.posts,
           totalPosts: resData._totalPosts,
@@ -136,12 +137,12 @@ class Feed extends Component {
       })
       .then((resData) => {
         const post = {
-          _id: resData.post._doc._id,
-          title: resData.post._doc.title,
-          creator: { name: "Carlos" },
-          content: resData.post._doc.content,
-          imageURL: resData.post._doc.imageURL,
-          createdAt: resData.post._doc.createdAt,
+          _id: resData.post._id,
+          title: resData.post.title,
+          creator: { name: resData.post.creator.name },
+          content: resData.post.content,
+          imageURL: resData.post.imageURL,
+          createdAt: resData.post.createdAt,
         };
 
         this.setState((prevState) => {
@@ -269,19 +270,21 @@ class Feed extends Component {
               onNext={this.loadPosts.bind(this, "next")}
               lastPage={Math.ceil(this.state.totalPosts / 2)}
               currentPage={this.state.postPage}>
-              {this.state.posts.map((post) => (
-                <Post
-                  key={post._id}
-                  id={post._id}
-                  author={post.creator.name}
-                  date={new Date(post.createdAt).toLocaleDateString("en-US")}
-                  title={post.title}
-                  image={post.imageUrl}
-                  content={post.content}
-                  onStartEdit={this.startEditPostHandler.bind(this, post._id)}
-                  onDelete={this.deletePostHandler.bind(this, post._id)}
-                />
-              ))}
+              {this.state.posts.map((post) => {
+                return (
+                  <Post
+                    key={post._id}
+                    id={post._id}
+                    author={post.creator.name}
+                    date={new Date(post.createdAt).toLocaleDateString("en-US")}
+                    title={post.title}
+                    image={post.imageUrl}
+                    content={post.content}
+                    onStartEdit={this.startEditPostHandler.bind(this, post._id)}
+                    onDelete={this.deletePostHandler.bind(this, post._id)}
+                  />
+                );
+              })}
             </Paginator>
           )}
         </section>

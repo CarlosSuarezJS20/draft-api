@@ -19,7 +19,7 @@ module.exports = (req, res, next) => {
   }
 
   if (!decodedToken) {
-    const err = new Error("Incorrect Token");
+    const err = new Error("Unknown token");
     err.status = 401;
     throw err;
   }

@@ -13,7 +13,7 @@ const postSchema = new Schema(
     },
     imageURL: {
       type: String,
-      required: false,
+      required: true,
     },
     creator: {
       type: Schema.Types.ObjectId,
