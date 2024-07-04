@@ -1,4 +1,5 @@
 const express = require("express");
+const authMiddleware = require("../middleware/isAuth");
 
 // validation
 const { body } = require("express-validator");
@@ -55,5 +56,8 @@ const emailLogin = () => [
 router.put("/signup", emailSignUpVal(), authController.signup);
 
 router.post("/login", emailLogin(), authController.login);
+
+router.get("/status", authMiddleware, authController.getStatus);
+router.put("/status", authMiddleware, authController.updateStatus);
 
 module.exports = router;

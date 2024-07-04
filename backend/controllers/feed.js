@@ -5,12 +5,31 @@ const User = require("../models/user");
 const NUMBER_OF_POSTS = 2;
 
 exports.deletePost = (req, res, next) => {
-  console.log("deleting");
   const postId = req.params.id;
 
-  Post.deleteOne({ _id: postId })
-    .then((resData) => {
-      console.log(resData);
+  Post.findOne({ _id: postId })
+    .then((post) => {
+      if (post.creator.toString() !== req.userId) {
+        const error = new Error(
+          "Authorization issue. Post does not belong to the user"
+        );
+        error.statusCode = 403;
+
+        throw error;
+      }
+
+      return Post.deleteOne({ _id: postId });
+    })
+    .then(() => {
+      return User.findOne({ _id: req.userId });
+    })
+    .then((user) => {
+      const { posts } = user;
+      const newPosts = posts.filter((post) => post._id !== postId);
+      user.posts = [...newPosts];
+      return user.save();
+    })
+    .then(() => {
       res.status(200).json({
         message: "Post deleted succefully!",
       });
@@ -55,6 +74,7 @@ exports.getPosts = (req, res, next) => {
     .then((total) => {
       totalPosts = total;
       return Post.find()
+        .sort({ createdAt: -1 })
         .populate("creator")
         .skip(skipPosts)
         .limit(NUMBER_OF_POSTS);
@@ -95,7 +115,6 @@ exports.createPost = (req, res, next) => {
 
   User.findById(req.userId)
     .then((user) => {
-      console.log(user);
       if (!user) {
         const error = new Error("Not user found");
         error.statusCode = 422;
@@ -113,14 +132,11 @@ exports.createPost = (req, res, next) => {
       return post.save();
     })
     .then((post) => {
-      console.log(post);
       newPost = post;
       currentUser.posts.push(post._id);
       currentUser.save();
-      // Create post in db
     })
     .then((result) => {
-      console.log(newPost);
       return res.status(201).json({
         message: "Post created successfully!",
         post: {
@@ -131,6 +147,7 @@ exports.createPost = (req, res, next) => {
           creator: { name: currentUser.name },
           createdAt: newPost.createdAt,
         },
+        result: result,
       });
     })
     .catch((err) => {
@@ -158,6 +175,20 @@ exports.updatePost = (req, res, next) => {
 
   Post.findById(postFilter)
     .then((post) => {
+      if (!post) {
+        const error = new Error("Post not found");
+        error.statusCode = 422;
+
+        throw error;
+      }
+      if (post.creator.toString() !== req.userId) {
+        const error = new Error(
+          "Authorization issue. Post does not belong to the user"
+        );
+        error.statusCode = 403;
+
+        throw error;
+      }
       post.title = postTitle;
       post.content = postContent;
 

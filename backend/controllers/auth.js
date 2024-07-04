@@ -3,8 +3,45 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
 
+exports.updateStatus = (req, res, next) => {
+  User.findById(req.userId)
+    .then((user) => {
+      user.status = req.body.status;
+      return user.save();
+    })
+    .then((response) => {
+      res.status(200).json({
+        message: "Updated status",
+        response: response,
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
+exports.getStatus = (req, res, next) => {
+  console.log(req.userId);
+  User.findById(req.userId)
+    .then((user) => {
+      console.log(user.status);
+      res.status(200).json({
+        message: "Here is user status",
+        status: user.status,
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
 exports.signup = (req, res, next) => {
-  console.log(req.body);
   if (!validationResult(req).isEmpty()) {
     const error = new Error("Validation failed. Check the details");
     error.statusCode = 422;

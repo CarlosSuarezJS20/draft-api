@@ -22,6 +22,25 @@ class Feed extends Component {
   };
 
   componentDidMount() {
+    if (this.props.token) {
+      fetch("http://localhost:8080/auth/status", {
+        credentials: "include",
+        headers: {
+          Authorization: "Bearer " + this.props.token,
+        },
+      })
+        .then((res) => {
+          if (res.status !== 200) {
+            throw new Error("Falied to fetch status");
+          }
+          return res.json();
+        })
+        .then((resData) => {
+          console.log(resData);
+          this.setState({ status: resData.status });
+        });
+    }
+
     this.loadPosts();
   }
 
@@ -65,7 +84,17 @@ class Feed extends Component {
 
   statusUpdateHandler = (event) => {
     event.preventDefault();
-    fetch("URL")
+    console.log(this.state.status);
+
+    fetch("http://localhost:8080/auth/status", {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        Authorization: "Bearer " + this.props.token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status: this.state.status }),
+    })
       .then((res) => {
         if (res.status !== 200 && res.status !== 201) {
           throw new Error("Can't update status!");
