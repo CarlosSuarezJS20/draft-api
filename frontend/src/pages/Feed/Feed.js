@@ -9,6 +9,10 @@ import Loader from "../../components/Loader/Loader";
 import ErrorHandler from "../../components/ErrorHandler/ErrorHandler";
 import "./Feed.css";
 
+import io from "socket.io-client";
+
+const SERVER_ENDPOINT = "http://localhost:8080";
+
 class Feed extends Component {
   state = {
     isEditing: false,
@@ -23,6 +27,7 @@ class Feed extends Component {
 
   componentDidMount() {
     if (this.props.token) {
+      const socket = io(SERVER_ENDPOINT);
       fetch("http://localhost:8080/auth/status", {
         credentials: "include",
         headers: {
@@ -39,10 +44,25 @@ class Feed extends Component {
           console.log(resData);
           this.setState({ status: resData.status });
         });
+      this.loadPosts();
+      socket.on("connect", () => {
+        console.log("client connected");
+      });
     }
+    this.setState({ posts: [] });
 
-    this.loadPosts();
+    // creating the socket:
   }
+
+  addNewPost = (post) => {
+    this.setState((prev) => {
+      const updatedPosts = [...prev.posts];
+      if (prevState.postPage === 1) {
+        updatedPosts.pop();
+        updatedPosts.unshift(post);
+      }
+    });
+  };
 
   loadPosts = (direction) => {
     if (direction) {
@@ -84,7 +104,6 @@ class Feed extends Component {
 
   statusUpdateHandler = (event) => {
     event.preventDefault();
-    console.log(this.state.status);
 
     fetch("http://localhost:8080/auth/status", {
       method: "PUT",
@@ -127,6 +146,8 @@ class Feed extends Component {
   };
 
   finishEditHandler = (postData) => {
+    const socket = io(SERVER_ENDPOINT);
+
     this.setState({
       editLoading: true,
     });
@@ -200,6 +221,7 @@ class Feed extends Component {
             editLoading: false,
           };
         });
+        socket.emit("add new post", this.addNewPost);
       })
       .catch((err) => {
         console.log(err);

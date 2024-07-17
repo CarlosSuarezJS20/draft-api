@@ -85,8 +85,21 @@ app.use((err, req, res, next) => {
 mongoose
   .connect(databaseUrl)
   .then(() => {
-    app.listen(8080, () => {
-      console.log("connected to mongoose");
+    const { Server } = require("socket.io");
+    const server = app.listen(8080, () => {
+      console.log("server is on!");
+    });
+    // setting socket
+    const io = new Server(server, {
+      cors: {
+        origin: "http://localhost:3000",
+        methods: ["GET", "POST"],
+        credentials: true,
+      },
+    });
+
+    io.on("connection", (s) => {
+      console.log("user is connected");
     });
   })
   .catch((err) => {
