@@ -98,8 +98,12 @@ mongoose
       },
     });
 
-    io.on("connection", (s) => {
-      console.log("user is connected");
+    io.on("connection", (socket) => {
+      // add a new post
+      console.log("user is connected", socket.id);
+      socket.on("add new post", (addNewPost) => {
+        io.emit("add new post", addNewPost);
+      });
     });
   })
   .catch((err) => {

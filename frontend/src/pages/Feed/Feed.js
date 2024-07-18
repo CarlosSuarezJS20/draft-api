@@ -55,13 +55,18 @@ class Feed extends Component {
   }
 
   addNewPost = (post) => {
-    this.setState((prev) => {
-      const updatedPosts = [...prev.posts];
+    this.setState((prevState) => {
+      const updatedPosts = [...prevState.posts];
       if (prevState.postPage === 1) {
         updatedPosts.pop();
         updatedPosts.unshift(post);
       }
+      return {
+        posts: updatedPosts,
+        totalPosts: prevState.totalPosts + 1,
+      };
     });
+    console.log(this.state);
   };
 
   loadPosts = (direction) => {
@@ -221,7 +226,8 @@ class Feed extends Component {
             editLoading: false,
           };
         });
-        socket.emit("add new post", this.addNewPost);
+        console.log("added new post successfully!");
+        socket.on("add new post", () => this.addNewPost.bind(this, post));
       })
       .catch((err) => {
         console.log(err);
